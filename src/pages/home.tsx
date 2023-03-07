@@ -1,7 +1,7 @@
 import Head from "next/head";
 
 import { api } from "@/utils/api";
-import HomeContent from "@/components/Home";
+import HomeContent from "@/components/Content";
 import Header from "@/components/Header";
 
 import { authOptions } from "@/server/auth";

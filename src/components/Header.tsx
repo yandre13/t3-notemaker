@@ -1,5 +1,6 @@
 import { signIn, signOut, useSession } from "next-auth/react";
 import Image from "next/image";
+import Link from "next/link";
 
 export default function Header() {
   const { data: sessionData } = useSession();
@@ -7,7 +8,9 @@ export default function Header() {
   return (
     <div className="navbar bg-primary text-primary-content">
       <div className="flex-1 pl-5 text-3xl font-bold">
-        {sessionData?.user?.name ? `Notes for ${sessionData.user.name}` : null}
+        {sessionData?.user?.name ? (
+          <Link href="/">Notes for {sessionData.user.name}</Link>
+        ) : null}
       </div>
       <div className="flex-none gap-2">
         <div className="dropdown-end dropdown">

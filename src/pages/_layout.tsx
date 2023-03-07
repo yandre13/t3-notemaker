@@ -5,6 +5,13 @@ import { useSession } from "next-auth/react";
 export default function Layout({ children }: { children: React.ReactNode }) {
   const { data: session } = useSession();
 
+  if (!session)
+    return (
+      <>
+        <Header />
+      </>
+    );
+
   return (
     <>
       <Header />

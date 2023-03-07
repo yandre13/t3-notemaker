@@ -9,13 +9,19 @@ export const noteRouter = createTRPCRouter({
       return ctx.prisma.note.findMany({
         where: {
           topicId: input.topicId,
+          authorId: ctx.session.user.id,
         },
       });
     }),
 
   create: protectedProcedure
     .input(
-      z.object({ title: z.string(), content: z.string(), topicId: z.string() })
+      z.object({
+        title: z.string(),
+        content: z.string(),
+        topicId: z.string(),
+        authorId: z.string(),
+      })
     )
     .mutation(({ ctx, input }) => {
       return ctx.prisma.note.create({
@@ -23,6 +29,7 @@ export const noteRouter = createTRPCRouter({
           title: input.title,
           content: input.content,
           topicId: input.topicId,
+          authorId: input.authorId,
         },
       });
     }),

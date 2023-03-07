@@ -3,34 +3,38 @@ import { useSession } from "next-auth/react";
 import { api } from "@/utils/api";
 import NoteEditor from "@/components/NoteEditor";
 import NoteCard from "@/components/NoteCard";
-import { type Session } from "next-auth";
 import { useSelectedTopicStore } from "@/store/topic";
+import { type Note } from "@prisma/client";
+import { useEffect } from "react";
+import { useRouter } from "next/router";
+import { useTopics } from "@/hooks/useTopics";
 
-export default function HomeContent() {
+export default function Content({
+  ssr,
+  topicId,
+  notes: notesSsr,
+}: {
+  notes?: Note[] | null;
+  topicId?: string;
+  ssr?: boolean;
+}) {
+  const router = useRouter();
   const { data: session } = useSession();
 
-  if (!session?.user) {
-    return null;
-  }
-
-  return (
-    <main>
-      <Content session={session} />
-    </main>
-  );
-}
-
-const Content = ({ session }: { session: Session }) => {
-  const { seletedTopic } = useSelectedTopicStore();
+  const { seletedTopic, setSelectedTopic } = useSelectedTopicStore();
 
   const { data: notes, refetch: refetchNotes } = api.note.getAll.useQuery(
     {
-      topicId: seletedTopic?.id ?? "",
+      topicId: seletedTopic ?? "",
     },
     {
       enabled: session?.user !== undefined && seletedTopic !== null,
+      initialData: notesSsr,
     }
   );
+  const { topics } = useTopics({
+    enabled: !!ssr,
+  });
 
   const createNote = api.note.create.useMutation({
     onSuccess: () => void refetchNotes(),
@@ -46,7 +50,8 @@ const Content = ({ session }: { session: Session }) => {
     createNote.mutate({
       title,
       content,
-      topicId: seletedTopic?.id ?? "",
+      topicId: seletedTopic ?? "",
+      authorId: session?.user?.id ?? "",
     });
   };
 
@@ -57,6 +62,21 @@ const Content = ({ session }: { session: Session }) => {
   const handleDelete = (id: string) => {
     deleteNote.mutate({ id });
   };
+
+  useEffect(() => {
+    // if topics does not include topicId, then push to home
+    if (
+      ssr &&
+      topicId &&
+      topics &&
+      !topics.map((t) => t.id).includes(topicId)
+    ) {
+      setSelectedTopic(topics[0]?.id ?? "");
+      void router.push("/");
+    } else {
+      setSelectedTopic(topicId ?? topics?.[0]?.id ?? "");
+    }
+  }, [router, topics, topicId, ssr, setSelectedTopic]);
 
   return (
     <section>
@@ -70,4 +90,4 @@ const Content = ({ session }: { session: Session }) => {
       <NoteEditor onSave={handleSave} />
     </section>
   );
-};
+}

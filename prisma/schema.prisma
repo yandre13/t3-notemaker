@@ -56,6 +56,7 @@ model User {
     accounts      Account[]
     sessions      Session[]
     topics        Topic[]
+    notes         Note[]
 }
 
 model VerificationToken {
@@ -84,4 +85,6 @@ model Note {
     content   String
     topic     Topic    @relation(fields: [topicId], references: [id])
     topicId   String
+    author    User     @relation(fields: [authorId], references: [id])
+    authorId  String
 }

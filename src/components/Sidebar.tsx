@@ -2,19 +2,14 @@ import { useSelectedTopicStore } from "@/store/topic";
 import { api } from "@/utils/api";
 import { type Session } from "next-auth";
 import Link from "next/link";
+import { useTopics } from "@/hooks/useTopics";
 
 export default function Sidebar({ session }: { session: Session | null }) {
   const { seletedTopic, setSelectedTopic } = useSelectedTopicStore();
 
-  const { data: topics, refetch: refetchTopics } = api.topic.getAll.useQuery(
-    undefined, // no input
-    {
-      enabled: session?.user !== undefined,
-      onSuccess: (data) => {
-        setSelectedTopic(seletedTopic ?? data[0] ?? null);
-      },
-    }
-  );
+  const { topics, refetchTopics } = useTopics({
+    enabled: session?.user !== undefined,
+  });
 
   const createTopic = api.topic.create.useMutation({
     onSuccess: () => void refetchTopics(),
@@ -33,10 +28,10 @@ export default function Sidebar({ session }: { session: Session | null }) {
     <aside>
       <ul className="menu rounded-box w-56 bg-base-100 p-2">
         {topics?.map?.((topic) => (
-          <li key={topic.id} onClick={() => void setSelectedTopic(topic)}>
+          <li key={topic.id} onClick={() => void setSelectedTopic(topic.id)}>
             <Link
               href={`/topic/${topic.id}`}
-              className={`${seletedTopic?.id === topic?.id ? "active" : ""}`}
+              className={`${seletedTopic === topic?.id ? "active" : ""}`}
             >
               {topic.title}
             </Link>
