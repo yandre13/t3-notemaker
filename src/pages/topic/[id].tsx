@@ -7,6 +7,17 @@ import { type GetServerSidePropsContext } from "next";
 export async function getServerSideProps(ctx: GetServerSidePropsContext) {
   const { id } = ctx.params as { id: string };
   const { referer } = ctx.req.headers;
+  const session = await getServerAuthSession(ctx);
+
+  // if theres no session, then the user is not logged in
+  if (!session) {
+    return {
+      redirect: {
+        destination: "/",
+        permanent: false,
+      },
+    };
+  }
 
   // if theres a referer, then the user is coming from next link
   if (referer) {
@@ -19,7 +30,6 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
     };
   }
 
-  const session = await getServerAuthSession(ctx);
   const notesDb = await prisma.note.findMany({
     where: {
       topicId: id,
