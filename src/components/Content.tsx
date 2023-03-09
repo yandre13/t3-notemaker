@@ -51,7 +51,7 @@ export default function Content({
       title,
       content,
       topicId: seletedTopic ?? "",
-      authorId: session?.user?.id ?? "",
+      authorId: session?.user?.id as string,
     });
   };
 

@@ -9,16 +9,6 @@ export async function getServerSideProps(ctx: GetServerSidePropsContext) {
   const { referer } = ctx.req.headers;
   const session = await getServerAuthSession(ctx);
 
-  // if theres no session, then the user is not logged in
-  if (!session) {
-    return {
-      redirect: {
-        destination: "/",
-        permanent: false,
-      },
-    };
-  }
-
   // if theres a referer, then the user is coming from next link
   if (referer) {
     return {

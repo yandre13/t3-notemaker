@@ -22,12 +22,10 @@ export default function Header() {
             >
               <div className="w-10 rounded-full">
                 <Image
-                  src={sessionData.user?.image ?? ""}
-                  alt={sessionData.user?.name ?? ""}
+                  src={sessionData.user?.image as string}
+                  alt={sessionData.user?.name as string}
                   width={40}
                   height={40}
-                  placeholder="blur"
-                  blurDataURL={sessionData.user?.image ?? ""}
                 />
               </div>
             </label>

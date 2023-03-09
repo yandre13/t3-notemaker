@@ -4,6 +4,7 @@ import {
   type NextAuthOptions,
   type DefaultSession,
 } from "next-auth";
+import { type JWT } from "next-auth/jwt";
 import GithubProvider from "next-auth/providers/github";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { env } from "@/env.mjs";
@@ -17,11 +18,12 @@ import { prisma } from "@/server/db";
  */
 declare module "next-auth" {
   interface Session extends DefaultSession {
-    user: {
-      id: string;
-      // ...other properties
-      // role: UserRole;
-    } & DefaultSession["user"];
+    user:
+      | {
+          id: string;
+          // ...other properties
+          // role: UserRole;
+        } & DefaultSession["user"];
   }
 
   // interface User {
@@ -37,11 +39,12 @@ declare module "next-auth" {
  */
 export const authOptions: NextAuthOptions = {
   callbacks: {
-    session({ session, user }) {
-      if (session.user) {
-        session.user.id = user.id;
-        // session.user.role = user.role; <-- put other properties on the session here
-      }
+    jwt({ token, user }) {
+      return { ...token, ...user };
+    },
+    session({ session, token }) {
+      session.user = token as { id: string } & JWT;
+      // session.user.role = user.role; <-- put other properties on the session here
       return session;
     },
   },
@@ -61,6 +64,9 @@ export const authOptions: NextAuthOptions = {
      * @see https://next-auth.js.org/providers/github
      */
   ],
+  session: {
+    strategy: "jwt",
+  },
 };
 
 /**
